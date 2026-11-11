@@ -29,3 +29,16 @@ bash scripts/push.sh    # sube todo, rota backups y suelta el LOCK
 - Si un Codespace murio sin hacer push (inactividad), el LOCK queda puesto:
   revisa que el mundo en R2 sea el que quieres y usa `pull.sh --force`.
 - Nunca subas claves al repo.
+
+## Autobackup y apagado remoto
+`start.sh` tambien inicia un vigilante (`tmux attach -t watch`) que:
+- sube un backup en vivo cada `BACKUP_EVERY` minutos (por defecto 30; secret opcional)
+- si escribes `stop` en el archivo `CMD` del bucket, apaga el server, hace push y suelta el LOCK
+
+## Si el Codespace se apaga solo por inactividad
+El disco se conserva. Al reabrirlo/arrancarlo: `bash scripts/pull.sh && bash scripts/start.sh`.
+Como el LOCK sigue siendo de ese mismo Codespace, `pull.sh` NO sobrescribe el mundo local.
+Lo maximo que se pierde es lo ocurrido desde el ultimo autobackup si el disco se perdiera.
+
+## Maquina
+El devcontainer pide 4 nucleos / 16 GB. Cuenta doble contra la cuota gratis de horas.

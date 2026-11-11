@@ -24,3 +24,13 @@ fi
 tmux new-session -d -s mc -c "$SERVER_DIR" \
   "java -Xms${MC_RAM} -Xmx${MC_RAM} -jar $(basename "$JAR") nogui"
 echo ">> Servidor iniciado con ${MC_RAM}. Consola: tmux attach -t mc  (salir sin cerrar: Ctrl+B y luego D)"
+
+# vigilante: autobackup y apagado remoto
+if ! tmux has-session -t watch 2>/dev/null; then
+  if [ -n "${R2_ACCESS_KEY_ID:-}" ]; then
+    tmux new-session -d -s watch -c "$ROOT" "bash scripts/watch.sh"
+    echo ">> watch iniciado (autobackup cada ${BACKUP_EVERY:-30} min). Ver: tmux attach -t watch"
+  else
+    echo "AVISO: sin secrets de R2, no se inicia el autobackup."
+  fi
+fi

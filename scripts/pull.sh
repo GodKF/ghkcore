@@ -13,11 +13,24 @@ fi
 
 # 1. Revisar LOCK
 CUR="$(rclone cat "r2:$BUCKET/LOCK" 2>/dev/null || true)"
-if [ -n "$CUR" ] && [[ "$CUR" != "$WHO "* ]] && [ "$FORCE" -eq 0 ]; then
+MINE=0
+if [ -n "$CUR" ] && [[ "$CUR" == "$WHO "* ]]; then MINE=1; fi
+
+if [ -n "$CUR" ] && [ "$MINE" -eq 0 ] && [ "$FORCE" -eq 0 ]; then
   echo "BLOQUEADO: el servidor lo tiene otro Codespace:"
   echo "  $CUR"
   echo "Si ya no esta activo y sabes que el mundo esta subido, usa: bash scripts/pull.sh --force"
   exit 1
+fi
+
+# Si el LOCK ya es de ESTE Codespace y el mundo local existe (por ejemplo, el
+# Codespace se apago por inactividad y se reinicio), el disco local es lo mas
+# reciente: NO lo sobrescribo con el backup de R2.
+if [ "$MINE" -eq 1 ] && [ -d "$SERVER_DIR/world" ] && [ "$FORCE" -eq 0 ]; then
+  echo "$WHO $(date -u +%FT%TZ)" | rclone rcat "r2:$BUCKET/LOCK"
+  echo "OK. El LOCK ya era de este Codespace y el mundo local existe: no descargo nada."
+  echo "(Para forzar la descarga desde R2: bash scripts/pull.sh --force)"
+  exit 0
 fi
 
 # 2. Parte liviana (mods, config, etc.)
