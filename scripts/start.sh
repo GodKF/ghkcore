@@ -12,13 +12,17 @@ JAR="$(ls "$SERVER_DIR"/forge-*.jar 2>/dev/null | head -n 1 || true)"
 [ -n "$JAR" ] || { echo "ERROR: no encuentro forge-*.jar en $SERVER_DIR"; exit 1; }
 
 # playit (mantiene la IP fija si usas la misma key)
-if [ -n "${PLAYIT_SECRET:-}" ]; then
-  if ! pgrep -x playit >/dev/null; then
-    nohup playit --secret "$PLAYIT_SECRET" > "$ROOT/playit.log" 2>&1 &
-    echo ">> playit iniciado (log: playit.log)"
-  fi
+if pgrep -x playit >/dev/null; then
+  echo ">> playit ya estaba corriendo."
+elif [ -n "${PLAYIT_SECRET:-}" ]; then
+  nohup playit --secret "$PLAYIT_SECRET" > "$ROOT/playit.log" 2>&1 &
+  echo ">> playit iniciado con PLAYIT_SECRET (log: playit.log)"
+elif [ -n "$(find "$HOME" -maxdepth 4 -name 'playit*.toml' 2>/dev/null | head -n 1)" ]; then
+  nohup playit > "$ROOT/playit.log" 2>&1 &
+  echo ">> playit iniciado con la config local vinculada (log: playit.log)"
 else
-  echo "AVISO: no hay PLAYIT_SECRET; el server arranca sin tunel."
+  echo "AVISO: playit no esta vinculado: el server arranca SIN tunel."
+  echo "       Vincula con: bash scripts/playit-setup.sh"
 fi
 
 tmux new-session -d -s mc -c "$SERVER_DIR" \

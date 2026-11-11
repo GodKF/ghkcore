@@ -42,3 +42,13 @@ Lo maximo que se pierde es lo ocurrido desde el ultimo autobackup si el disco se
 
 ## Maquina
 El devcontainer pide 4 nucleos / 16 GB. Cuenta doble contra la cuota gratis de horas.
+
+## Primera vez con playit
+Mientras no exista `PLAYIT_SECRET`, vincula playit dentro del Codespace:
+```bash
+bash scripts/playit-setup.sh
+```
+Sigue el enlace de claim, apruebalo en playit.gg y, al volver, el script te muestra
+donde quedo guardada la key. En playit.gg crea un tunel **Minecraft Java** a `127.0.0.1:25565`.
+`start.sh` usa `PLAYIT_SECRET` si existe y, si no, la config local ya vinculada.
+Para compartir la IP entre cuentas, esa misma key se guarda luego como secret `PLAYIT_SECRET`.
